@@ -1,36 +1,43 @@
-const formSet = document.querySelector('.feedback-form');
-const inputinfo = formSet.elements.email;
-const areainfo = formSet.elements.message;
-let saveinfo = { email: '', message: '' };
+let form, emailInput, messageInput;
 
-const parsedinfo = JSON.parse(localStorage.getItem('feedback-form-state'));
-
-if (parsedinfo !== null) {
-    areainfo.value = parsedinfo.message;
-    inputinfo.value = parsedinfo.email;
-
-    saveinfo = parsedinfo;
-}
-
-formSet.addEventListener('input', event => {
-    const email = event.currentTarget.elements.email.value;
-    const message = event.currentTarget.elements.message.value;
-
-    saveinfo.email = email.trim();
-    saveinfo.message = message.trim();
-    localStorage.setItem('feedback-form-state', JSON.stringify(saveinfo));
-});
-
-formSet.addEventListener('submit', evt => {
-    evt.preventDefault();
-
-    if (!saveinfo.email || !saveinfo.message) {
-        console.log('Please fill in all fields.');
-    } else {
-        console.log(saveinfo);
-        localStorage.removeItem('feedback-form-state');
-        formSet.reset();
-        saveinfo.email = '';
-        saveinfo.message = '';
+window.addEventListener('DOMContentLoaded', () => {
+    form = document.querySelector('form');
+    emailInput = document.querySelector('input[name="email"]');
+    messageInput = document.querySelector('textarea[name="message"]');
+    
+    const storedData = localStorage.getItem('feedback-form-state');
+    if (storedData) {
+        const { email, message } = JSON.parse(storedData);
+        emailInput.value = email;
+        messageInput.value = message;
     }
+
+    form.addEventListener('input', event => {
+        const { target } = event;
+        if (target.matches('input[name="email"], textarea[name="message"]')) {
+            const formData = {
+                email: emailInput.value.trim(),
+                message: messageInput.value.trim()
+            };
+            localStorage.setItem('feedback-form-state', JSON.stringify(formData));
+        }
+    });
+
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+        
+        if (emailInput.value.trim() === '' || messageInput.value.trim() === '') {
+            alert('Будь ласка, заповніть всі поля форми.');
+            return;
+        }
+
+        console.log('Form submitted:', {
+            email: emailInput.value,
+            message: messageInput.value
+        });
+
+        localStorage.removeItem('feedback-form-state');
+        emailInput.value = '';
+        messageInput.value = '';
+    });
 });
